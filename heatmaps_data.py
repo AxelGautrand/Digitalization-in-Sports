@@ -20,7 +20,7 @@ class App:
         self.app.geometry('1400x750')
 
         # Create the title of the interface
-        self.title = tk.Label(text="Python rocks!")
+        self.title = tk.Label(text="Match Analysis Application ")
         self.title.pack()
 
         ## Add the competition selector Menu
@@ -88,6 +88,24 @@ class App:
         self.max_min.set(90)
         self.max_min.pack()
 
+        ## Add Event Selector Menu
+        # Get all events type
+        self.all_events_types = ['All', '50/50', 'Bad Behaviour', 'Ball Receipt*', 'Ball Recovery', 'Block', 'Carry',
+                                 'Clearance', 'Dispossessed', 'Dribble', 'Dribbled Past', 'Duel', 'Error',
+                                 'Foul Committed', 'Foul Won', 'Goal Keeper', 'Half End', 'Half Start',
+                                 'Injury Stoppage', 'Interception', 'Miscontrol', 'Offside', 'Own Goal Against',
+                                 'Own Goal For', 'Pass', 'Player Off', 'Player On', 'Pressure', 'Referee Ball-Drop',
+                                 'Shield', 'Shot', 'Starting XI', 'Substitution', 'Tactical Shift']
+        # Create the event type variable
+        self.event_type_variable = tk.StringVar(self.app)
+        self.event_type_variable.set(self.all_events_types[0])
+
+        # Create the selector
+        self.opt_event_type = tk.OptionMenu(self.app, self.event_type_variable, *self.all_events_types)
+        # Add the selector to the app
+        self.opt_event_type.config(width=90, font=('Helvetica', 12))
+        self.opt_event_type.pack(side="top")
+
         # Create button to activate the heatmap
         button = tk.Button(self.app, text="Get Heatmap", command=self.create_heatmaps)
         button.pack()
@@ -146,11 +164,15 @@ class App:
 
         # Get all events corresponding to the game
         self.events_df = pd.DataFrame(sb.events(self.match_id))
-        # FIXME : Depending on the timestamp as well
+        # Corresponding to the timestamp
         self.events_df = self.events_df.loc[
             (self.events_df['minute'] >= self.min_min.get()) & (self.events_df['minute'] <= self.max_min.get())]
+        # Corresponding to the event type
+        #FIXME : Handle when empty
+        if self.event_type_variable.get() != 'All':
+            self.events_df = self.events_df.loc[self.events_df['type'] == self.event_type_variable.get()]
 
-        # Get all 360 corresponding to the game
+        # Get all 360 corresponding to the events
         # FIXME : Problem to retrieve data from some matches
         self.frames_df = pd.DataFrame(sb.frames(self.match_id))
 
@@ -161,7 +183,8 @@ class App:
             self.corres_event = self.events_df[self.events_df['id'] == frame[1]['id']]
             if self.corres_event.empty:
                 continue
-            team_possession = True if self.corres_event['team'].to_numpy()[0] == self.team_name_variable.get() else False
+            team_possession = True if self.corres_event['team'].to_numpy()[
+                                          0] == self.team_name_variable.get() else False
 
             if ((team_possession) & (frame[1]['teammate'])) | ((not team_possession) & (not frame[1]['teammate'])):
                 self.x_pos.append(frame[1]['location'][0])
@@ -224,7 +247,12 @@ class App:
         # Tidy Axes
         plt.axis('off')
 
-        sns.kdeplot(self.x_pos, self.y_pos, shade=True, n_levels=15, thresh=0)
+        # sns.kdeplot(self.x_pos, self.y_pos, shade=True, n_levels=15, thresh=0)
+        # Make a histogram of positions
+        H_pos = np.histogram2d(self.y_pos, self.x_pos, bins=8, range=[[0, 90], [0, 130]])
+        pos = ax.imshow(H_pos[0], extent=[0, 130, 0, 90], aspect='auto', cmap=plt.cm.Reds)
+        fig.colorbar(pos, ax=ax)
+
         plt.ylim(0, 90)
         plt.xlim(0, 130)
 
