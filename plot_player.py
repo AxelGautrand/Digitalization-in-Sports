@@ -3,6 +3,11 @@ from statsbombpy import sb
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.patches import Arc
+import pandas as pd
+from matplotlib.patches import Ellipse
+import matplotlib.patheffects as path_effects
+
+from mplsoccer.pitch import Pitch
 
 def createPitch(length,width, unity,linecolor): # in meters
     # Code by @JPJ_dejong
@@ -164,7 +169,7 @@ if __name__ == '__main__':
     events_id = {}
     for k in events.keys():
         if events[k]['type']['name']!='Starting XI' and events[k].get('location') is not None:
-            t = {'team' : events[k]['possession_team'], 'location' : events[k]['location'], 'period' : events[k]['period']}
+            t = {'team' : events[k]['possession_team'], 'location' : events[k]['location'], 'period' : events[k]['period'], "type" : events[k]['type']['name']}
             events_id[events[k]['id']] = {'value' : t}
 
 
@@ -176,7 +181,7 @@ if __name__ == '__main__':
 
     count = 0    
     for k in event.keys():
-        if count > 10:
+        if count > 1:
             break
         count = count + 1
 
@@ -258,3 +263,142 @@ if __name__ == '__main__':
         fig.set_size_inches(10, 7)
         plt.show()
             
+
+    type_event = []
+    for k in event.keys():
+        type_event.append(event[k]['ball']['type'])
+
+    type_event = set(type_event)
+    
+    from matplotlib.colorbar import constrained_layout
+
+    type_event = []
+    for k in event.keys():
+        type_event.append(event[k]['ball']['type'])
+
+    type_event = set(type_event)
+
+    for x in type_event:
+      for k in event.keys():
+         
+          if x == event[k]['ball']['type']:
+              print('--------------------' + x+ '--------------------')
+              home_team_x = []
+              home_team_y = []
+              away_team_x = []
+              away_team_y = []
+              home_t = []
+              away_t = []
+
+              (fig,ax) = createPitch(120,80,'yards','gray')
+              
+              if event[k]['ball']['period']==1:
+                  if event[k]['ball']['team']['id']==865:
+                      x = event[k]['ball']['location'][0]
+                      y = event[k]['ball']['location'][1]
+                      positionBall = plt.Circle((x,y),2,color="black")
+                      ax.add_patch(positionBall)
+
+                      for i in range(len(event[k]['sameTeam'])):
+                          x=event[k]['sameTeam'][i][0]
+                          y=event[k]['sameTeam'][i][1]
+                          position = plt.Circle((x,y),2,color="red")
+                          ax.add_patch(position)
+                          home_team_x.append(x)
+                          home_team_y.append(y)
+                          home_t.append(0)
+
+                      for j in range(len(event[k]['opponentTeam'])):
+                          x=event[k]['opponentTeam'][j][0]
+                          y=event[k]['opponentTeam'][j][1]
+                          position = plt.Circle((x,y),2,color="blue")
+                          ax.add_patch(position)
+                          away_team_x.append(x)
+                          away_team_y.append(y)
+                          away_t.append(1)
+
+                  else:
+                      x = event[k]['ball']['location'][0]
+                      y = event[k]['ball']['location'][1]
+                      positionBall = plt.Circle((120-x,y),2,color="black")
+                      ax.add_patch(positionBall)
+
+                      for i in range(len(event[k]['sameTeam'])):
+                          x=event[k]['sameTeam'][i][0]
+                          y=event[k]['sameTeam'][i][1]
+                          position = plt.Circle((120-x,y),2,color="blue")
+                          ax.add_patch(position)
+                          away_team_x.append(120-x)
+                          away_team_y.append(y)
+                          away_t.append(1)
+
+
+                      for j in range(len(event[k]['opponentTeam'])):
+                          x=event[k]['opponentTeam'][j][0]
+                          y=event[k]['opponentTeam'][j][1]
+                          position = plt.Circle((120-x,y),2,color="red")
+                          ax.add_patch(position)
+                          home_team_x.append(120-x)
+                          home_team_y.append(y)
+                          home_t.append(0)
+                          
+              else:
+                  if event[k]['ball']['team']['id']==865:
+                      x = event[k]['ball']['location'][0]
+                      y = event[k]['ball']['location'][1]
+                      positionBall = plt.Circle((120-x,y),2,color="black")
+                      ax.add_patch(positionBall)
+
+                      for i in range(len(event[k]['sameTeam'])):
+                          x=event[k]['sameTeam'][i][0]
+                          y=event[k]['sameTeam'][i][1]
+                          position = plt.Circle((120-x,y),2,color="red")
+                          ax.add_patch(position)
+                          home_team_x.append(120-x)
+                          home_team_y.append(y)
+                          home_t.append(0)
+
+                      for j in range(len(event[k]['opponentTeam'])):
+                          x=event[k]['opponentTeam'][j][0]
+                          y=event[k]['opponentTeam'][j][1]
+                          position = plt.Circle((120-x,y),2,color="blue")
+                          ax.add_patch(position)
+                          away_team_x.append(120-x)
+                          away_team_y.append(y)
+                          away_t.append(1)
+                  else:
+                      x = event[k]['ball']['location'][0]
+                      y = event[k]['ball']['location'][1]
+                      positionBall = plt.Circle((x,y),2,color="black")
+                      ax.add_patch(positionBall)
+
+                      for i in range(len(event[k]['sameTeam'])):
+                          x=event[k]['sameTeam'][i][0]
+                          y=event[k]['sameTeam'][i][1]
+                          position = plt.Circle((x,y),2,color="blue")
+                          ax.add_patch(position)
+                          away_team_x.append(x)
+                          away_team_y.append(y)
+                          away_t.append(1)
+
+                      for j in range(len(event[k]['opponentTeam'])):
+                          x=event[k]['opponentTeam'][j][0]
+                          y=event[k]['opponentTeam'][j][1]
+                          position = plt.Circle((x,y),2,color="red")
+                          ax.add_patch(position)
+                          home_team_x.append(x)
+                          home_team_y.append(y)
+                          home_t.append(0)
+
+
+              df = pd.DataFrame({'x' : home_team_x+away_team_x, 'y' : home_team_y+away_team_y, 'team' : home_t+away_t})
+
+              pitch = Pitch(pitch_type = 'statsbomb')
+              team1, team2 = pitch.voronoi(df.x, df.y, df.team)
+
+              t1 = pitch.polygon(team1, ax=ax, fc='blue', ec='white', lw=3, alpha=.4)
+              t2 = pitch.polygon(team2, ax=ax, fc='red', ec='white', lw=3, alpha=.4)
+
+              fig.set_size_inches(10, 7)
+              plt.show()
+              break
