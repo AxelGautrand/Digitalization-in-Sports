@@ -5,7 +5,6 @@ from statsbombpy import sb
 import tkinter as tk
 import matplotlib.pyplot as plt
 from matplotlib.patches import Arc
-import seaborn as sns
 
 
 class App:
@@ -90,6 +89,7 @@ class App:
 
         ## Add Event Selector Menu
         # Get all events type
+
         self.all_events_types = ['All', '50/50', 'Bad Behaviour', 'Ball Receipt*', 'Ball Recovery', 'Block', 'Carry',
                                  'Clearance', 'Dispossessed', 'Dribble', 'Dribbled Past', 'Duel', 'Error',
                                  'Foul Committed', 'Foul Won', 'Goal Keeper', 'Half End', 'Half Start',
